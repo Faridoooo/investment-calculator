@@ -1,41 +1,30 @@
-const form = document.querySelector('#savings-form');
-const amountInput = document.querySelector('#amount');
-const rateInput = document.querySelector('#rate');
-const errorMessage = document.querySelector('#error-message');
-
-const currencyFormatter = new Intl.NumberFormat('ar-SA', {
-  style: 'currency',
-  currency: 'SAR',
-  minimumFractionDigits: 2,
-  maximumFractionDigits: 2,
-});
-
-function formatCurrency(value) {
-  return currencyFormatter.format(value);
+const KEY='farido-finance-v1';
+let data=JSON.parse(localStorage.getItem(KEY)||'{"money":[],"investments":[],"expenses":[],"goals":[],"emergency":{"current":0,"target":0}}');
+const $=s=>document.querySelector(s); const money=v=>new Intl.NumberFormat('ar-EG',{style:'currency',currency:'EGP',maximumFractionDigits:2}).format(Number(v)||0);
+function save(){localStorage.setItem(KEY,JSON.stringify(data));render()}
+function totalMoney(){return data.money.reduce((a,x)=>a+Number(x.amount),0)}
+function annual(){return data.investments.reduce((a,x)=>a+Number(x.amount)*Number(x.rate)/100,0)}
+function monthExp(){let d=new Date(),m=d.getMonth(),y=d.getFullYear();return data.expenses.filter(x=>{let z=new Date(x.date);return z.getMonth()===m&&z.getFullYear()===y}).reduce((a,x)=>a+Number(x.amount),0)}
+function render(){
+ $('#totalMoney').textContent=money(totalMoney());$('#totalInvestments').textContent=money(data.investments.reduce((a,x)=>a+Number(x.amount),0));$('#annualReturn').textContent=money(annual());$('#monthExpenses').textContent=money(monthExp());$('#dailyReturn').textContent=money(annual()/365);$('#monthlyReturn').textContent=money(annual()/12);$('#returnsAnnual').textContent=money(annual());$('#expenseTotal').textContent=money(monthExp());
+ list('moneyList',data.money,(x,i)=>`<div><h3>${esc(x.name)}</h3><p>${money(x.amount)}</p></div><div class="item-actions"><button class="small-btn" onclick="editItem('money',${i})">تعديل</button><button class="small-btn" onclick="delItem('money',${i})">حذف</button></div>`);
+ list('investmentList',data.investments,(x,i)=>`<div><h3>${esc(x.name)}</h3><p>${money(x.amount)} — عائد ${x.rate}%</p></div><div class="item-actions"><button class="small-btn" onclick="editItem('investments',${i})">تعديل</button><button class="small-btn" onclick="delItem('investments',${i})">حذف</button></div>`);
+ list('expenseList',data.expenses.slice().reverse(),(x,i)=>`<div><h3>${esc(x.category)}</h3><p>${money(x.amount)} — ${x.date}</p></div><div class="item-actions"><button class="small-btn" onclick="delExpense(${data.expenses.length-1-i})">حذف</button></div>`);
+ list('goalList',data.goals,(x,i)=>{let p=x.target?Math.min(100,x.current/x.target*100):0;return `<div style="width:100%"><h3>${esc(x.name)}</h3><p>${money(x.current)} من ${money(x.target)} — ${p.toFixed(0)}%</p><div class="progress"><i style="width:${p}%"></i></div></div><div class="item-actions"><button class="small-btn" onclick="delItem('goals',${i})">حذف</button></div>`});
+ $('#emCurrent').value=data.emergency.current||0;$('#emTarget').value=data.emergency.target||0;let ep=data.emergency.target?Math.min(100,data.emergency.current/data.emergency.target*100):0;$('#emProgress').style.width=ep+'%';$('#emPercent').textContent=ep.toFixed(0)+'%';
 }
-
-function displayResults(amount, rate) {
-  const yearlyReturn = amount * (rate / 100);
-  const dailyReturn = yearlyReturn / 365;
-  const monthlyReturn = yearlyReturn / 12;
-  const totalAfterYear = amount + yearlyReturn;
-
-  document.querySelector('#daily-return').textContent = formatCurrency(dailyReturn);
-  document.querySelector('#monthly-return').textContent = formatCurrency(monthlyReturn);
-  document.querySelector('#yearly-return').textContent = formatCurrency(yearlyReturn);
-  document.querySelector('#total-after-year').textContent = formatCurrency(totalAfterYear);
-}
-
-form.addEventListener('submit', (event) => {
-  event.preventDefault();
-  const amount = Number(amountInput.value);
-  const rate = Number(rateInput.value);
-
-  if (!Number.isFinite(amount) || !Number.isFinite(rate) || amount < 0 || rate < 0 || amountInput.value === '' || rateInput.value === '') {
-    errorMessage.textContent = 'يرجى إدخال مبلغ ونسبة عائد صالحين (صفر أو أكثر).';
-    return;
-  }
-
-  errorMessage.textContent = '';
-  displayResults(amount, rate);
-});
+function list(id,arr,html){let e=$('#'+id);e.innerHTML=arr.length?arr.map((x,i)=>`<div class="list-item">${html(x,i)}</div>`).join(''):'<div class="empty">لا توجد بيانات بعد.</div>'}
+function esc(s){return String(s||'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
+function modal(title,fields,cb){$('#modalTitle').textContent=title;$('#modalForm').innerHTML=fields.map(f=>`<label>${f.label}<input name="${f.name}" type="${f.type||'text'}" value="${f.value??''}" ${f.step?'step="any"':''} required></label>`).join('')+'<button type="submit">حفظ</button>';$('#modal').classList.add('show');$('#modalForm').onsubmit=e=>{e.preventDefault();cb(Object.fromEntries(new FormData(e.target)));$('#modal').classList.remove('show');save()}}
+function addMoney(i=null){let x=i==null?{}:data.money[i];modal(i==null?'إضافة رصيد':'تعديل الرصيد',[{label:'الاسم',name:'name',value:x.name},{label:'المبلغ',name:'amount',type:'number',value:x.amount,step:1}],v=>{if(i==null)data.money.push(v);else data.money[i]=v})}
+function addInvestment(i=null){let x=i==null?{}:data.investments[i];modal(i==null?'إضافة استثمار':'تعديل الاستثمار',[{label:'اسم الاستثمار',name:'name',value:x.name},{label:'المبلغ',name:'amount',type:'number',value:x.amount,step:1},{label:'العائد السنوي %',name:'rate',type:'number',value:x.rate,step:1}],v=>{if(i==null)data.investments.push(v);else data.investments[i]=v})}
+function addExpense(){modal('إضافة مصروف',[{label:'المبلغ',name:'amount',type:'number',step:1},{label:'التصنيف',name:'category',value:'أكل وشرب'},{label:'التاريخ',name:'date',type:'date',value:new Date().toISOString().slice(0,10)}],v=>data.expenses.push(v))}
+function addGoal(){modal('إضافة هدف',[{label:'اسم الهدف',name:'name'},{label:'المبلغ المستهدف',name:'target',type:'number',step:1},{label:'المبلغ الحالي',name:'current',type:'number',step:1}],v=>data.goals.push(v))}
+window.editItem=(t,i)=>t==='money'?addMoney(i):addInvestment(i);window.delItem=(t,i)=>{if(confirm('حذف هذا العنصر؟')){data[t].splice(i,1);save()}};window.delExpense=i=>{if(confirm('حذف المصروف؟')){data.expenses.splice(i,1);save()}};
+$('#tabs').onclick=e=>{let b=e.target.closest('button[data-page]');if(!b)return;document.querySelectorAll('.tabs button').forEach(x=>x.classList.remove('active'));b.classList.add('active');document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));$('#'+b.dataset.page).classList.add('active')};
+$('#addMoneyBtn').onclick=()=>addMoney();$('#addInvestmentBtn').onclick=()=>addInvestment();$('#addExpenseBtn').onclick=addExpense;$('#addGoalBtn').onclick=addGoal;$('#closeModal').onclick=()=>$('#modal').classList.remove('show');$('#saveEmergency').onclick=()=>{data.emergency={current:Number($('#emCurrent').value),target:Number($('#emTarget').value)};save()};
+$('#calcBtn').onclick=()=>{let c=Number($('#calcCapital').value),r=Number($('#calcRate').value)/100,m=Number($('#calcMonths').value),a=Number($('#calcMonthly').value);if(c<0||r<0||m<1||a<0)return;let end=c;for(let i=0;i<m;i++)end=end*(1+r/12)+a;let profit=end-c-a*m;$('#calcResult').innerHTML=`<b>الإجمالي المتوقع: ${money(end)}</b><br>الإضافات: ${money(a*m)}<br>العائد التقريبي: ${money(profit)}`};
+$('#exportBtn').onclick=()=>{let blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='مديري-المالي-backup.json';a.click();URL.revokeObjectURL(a.href)};
+$('#importInput').onchange=e=>{let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{data=JSON.parse(r.result);save();alert('تم استيراد البيانات بنجاح')}catch{alert('ملف غير صالح')}};r.readAsText(f)};
+$('#resetBtn').onclick=()=>{if(confirm('سيتم حذف كل بياناتك المحلية. هل أنت متأكد؟')){localStorage.removeItem(KEY);location.reload()}};$('#themeBtn').onclick=()=>document.body.classList.toggle('dark');
+render();
