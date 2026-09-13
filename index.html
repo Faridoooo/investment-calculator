@@ -1,69 +1,28 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="حاسبة عربية بسيطة لحساب العائد على المدخرات." />
-  <title>حاسبة عائد المدخرات</title>
-  <link rel="stylesheet" href="style.css" />
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="مديري المالي - إدارة الأموال والمدخرات والاستثمارات والمصروفات والأهداف المالية.">
+<title>مديري المالي</title><link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <main class="calculator-shell">
-    <section class="hero" aria-labelledby="page-title">
-      <span class="eyebrow">خطّط لمدخراتك</span>
-      <h1 id="page-title">حاسبة عائد المدخرات</h1>
-      <p>أدخل مبلغ مدخراتك ونسبة العائد السنوي لمعرفة العائد المتوقع خلال سنة.</p>
-    </section>
-
-    <section class="calculator-card" aria-label="حاسبة العائد">
-      <form id="savings-form" novalidate>
-        <div class="input-group">
-          <label for="amount">مبلغ المدخرات</label>
-          <div class="field-wrap">
-            <input id="amount" name="amount" type="number" inputmode="decimal" min="0" step="any" placeholder="مثال: 10000" required />
-            <span>ر.س</span>
-          </div>
-        </div>
-
-        <div class="input-group">
-          <label for="rate">نسبة العائد السنوي</label>
-          <div class="field-wrap">
-            <input id="rate" name="rate" type="number" inputmode="decimal" min="0" step="any" placeholder="مثال: 5" required />
-            <span>%</span>
-          </div>
-        </div>
-
-        <p class="error-message" id="error-message" role="alert" aria-live="polite"></p>
-        <button type="submit">احسب العائد</button>
-      </form>
-
-      <div class="results" id="results" aria-live="polite">
-        <div class="results-heading">
-          <h2>العائد المتوقع</h2>
-          <span>عائد بسيط</span>
-        </div>
-        <div class="result-grid">
-          <article class="result-item">
-            <p>العائد اليومي</p>
-            <strong id="daily-return">—</strong>
-          </article>
-          <article class="result-item">
-            <p>العائد الشهري</p>
-            <strong id="monthly-return">—</strong>
-          </article>
-          <article class="result-item accent">
-            <p>العائد السنوي</p>
-            <strong id="yearly-return">—</strong>
-          </article>
-          <article class="result-item total">
-            <p>إجمالي المبلغ بعد سنة</p>
-            <strong id="total-after-year">—</strong>
-          </article>
-        </div>
-        <p class="calculation-note">يُحسب العائد اليومي بقسمة العائد السنوي على 365 يومًا، والشهري بقسمته على 12 شهرًا.</p>
-      </div>
-    </section>
-  </main>
-  <script src="script.js"></script>
-</body>
-</html>
+<div class="app">
+<header class="topbar"><div><span class="eyebrow">إدارة أموالك ببساطة</span><h1>مديري المالي</h1></div><button id="themeBtn" class="icon-btn" title="تبديل المظهر">◐</button></header>
+<nav class="tabs" id="tabs">
+<button class="active" data-page="home">الرئيسية</button><button data-page="money">أموالي</button><button data-page="investments">استثماراتي</button><button data-page="returns">العوائد</button><button data-page="expenses">المصروفات</button><button data-page="goals">أهدافي</button><button data-page="emergency">الطوارئ</button><button data-page="calculator">الحاسبة</button>
+</nav>
+<main>
+<section id="home" class="page active"><div class="hero"><h2>نظرة سريعة على وضعك المالي</h2><p>كل بياناتك محفوظة على هذا الجهاز فقط في النسخة الأولى.</p></div><div class="cards"><article><span>إجمالي أموالي</span><strong id="totalMoney">0 ج.م</strong></article><article><span>الاستثمارات</span><strong id="totalInvestments">0 ج.م</strong></article><article><span>العائد السنوي المتوقع</span><strong id="annualReturn">0 ج.م</strong></article><article><span>مصروفات الشهر</span><strong id="monthExpenses">0 ج.م</strong></article></div><div class="panel"><h3>آخر العمليات</h3><div id="recent" class="empty">لا توجد عمليات بعد.</div></div></section>
+<section id="money" class="page"><div class="section-head"><div><h2>أموالي</h2><p>الأرصدة التي تملكها حاليًا.</p></div><button class="primary" id="addMoneyBtn">+ إضافة رصيد</button></div><div id="moneyList" class="list"></div></section>
+<section id="investments" class="page"><div class="section-head"><div><h2>استثماراتي</h2><p>سجل أدواتك الاستثمارية ونسب عوائدها يدويًا.</p></div><button class="primary" id="addInvestmentBtn">+ إضافة استثمار</button></div><div id="investmentList" class="list"></div></section>
+<section id="returns" class="page"><div class="panel"><h2>العوائد المتوقعة</h2><div class="cards"><article><span>يومي</span><strong id="dailyReturn">0 ج.م</strong></article><article><span>شهري</span><strong id="monthlyReturn">0 ج.م</strong></article><article><span>سنوي</span><strong id="returnsAnnual">0 ج.م</strong></article></div><p class="note">الحسابات تقديرية بناءً على نسب العائد التي أدخلتها أنت، وليست ضمانًا لعائد مستقبلي.</p></div></section>
+<section id="expenses" class="page"><div class="section-head"><div><h2>المصروفات</h2><p>تابع أين تذهب أموالك.</p></div><button class="primary" id="addExpenseBtn">+ إضافة مصروف</button></div><div class="summary"><b>إجمالي الشهر: <span id="expenseTotal">0 ج.م</span></b></div><div id="expenseList" class="list"></div></section>
+<section id="goals" class="page"><div class="section-head"><div><h2>أهدافي</h2><p>حوّل أهدافك إلى أرقام وخطة واضحة.</p></div><button class="primary" id="addGoalBtn">+ إضافة هدف</button></div><div id="goalList" class="list"></div></section>
+<section id="emergency" class="page"><div class="panel emergency"><h2>صندوق الطوارئ</h2><div class="form-grid"><label>المبلغ الحالي<input id="emCurrent" type="number" min="0" step="any"></label><label>الهدف<input id="emTarget" type="number" min="0" step="any"></label></div><div class="progress"><i id="emProgress"></i></div><strong id="emPercent">0%</strong><button class="primary" id="saveEmergency">حفظ</button></div></section>
+<section id="calculator" class="page"><div class="panel"><h2>حاسبة الاستثمار</h2><div class="form-grid"><label>رأس المال<input id="calcCapital" type="number" min="0" step="any" placeholder="10000"></label><label>العائد السنوي %<input id="calcRate" type="number" min="0" step="any" placeholder="19"></label><label>المدة بالأشهر<input id="calcMonths" type="number" min="1" step="1" value="12"></label><label>إضافة شهرية<input id="calcMonthly" type="number" min="0" step="any" value="0"></label></div><button class="primary" id="calcBtn">احسب</button><div id="calcResult" class="calc-result"></div></div></section>
+<section class="page" id="settings"><div class="panel"><h2>النسخ الاحتياطي</h2><p>صدّر بياناتك أو استعد نسخة سابقة.</p><div class="actions"><button class="primary" id="exportBtn">تصدير JSON</button><label class="file-btn">استيراد JSON<input id="importInput" type="file" accept="application/json"></label><button class="danger" id="resetBtn">مسح كل البيانات</button></div></div></section>
+</main>
+<div id="modal" class="modal"><div class="modal-card"><button id="closeModal" class="close">×</button><h3 id="modalTitle">إضافة</h3><form id="modalForm"></form></div></div>
+<footer>مديري المالي — بياناتك محلية على جهازك في هذه النسخة.</footer>
+<script src="script.js"></script>
+</div></body></html>
